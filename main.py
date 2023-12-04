@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 import matplotlib.pyplot as plt
+import prophet as pr
 
 """ SETTINGS """
 DIRECTORY = "data/"
@@ -9,6 +10,9 @@ DATASET = "dataset.json"
 """ PARSE """
 # Initialiser une liste pour stocker les données
 data_list = []
+
+""" PROPHET INSTANCE"""
+prophet_instance = pr.Prophet()
 
 with open(DIRECTORY + DATASET, "r") as read_file:
     # Lire chaque ligne du fichier
@@ -34,7 +38,7 @@ with open(DIRECTORY + DATASET, "r") as read_file:
 
 # Créer un DataFrame Pandas à partir de la liste de données
 df = pd.DataFrame(data_list)
-
+#prophet_instance.fit(df)
 # Convertir la colonne 'mdate' en format de date
 df['mdate'] = pd.to_datetime(df['mdate'])
 
