@@ -13,6 +13,8 @@ data_list = []
 with open(DIRECTORY + DATASET, "r") as read_file:
     # Lire chaque ligne du fichier
     for line in read_file:
+        if line == "\n":
+            continue
         # Charger la ligne JSON
         data = json.loads(line)
         feature = data['features'][0]
