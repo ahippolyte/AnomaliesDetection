@@ -88,15 +88,14 @@ while current_date >= start_date and timeout_count < max_retries:
 
     # Rest of the code remains unchanged...
     if response.status_code == 200:
-        data.write(str(response.content.decode('utf-8')))
         tmp_date = extract_date(str(response.content.decode('utf-8')))
         if (tmp_date <= current_date):
+            data.write(str(response.content.decode('utf-8')))
             data.write("\n")
             current_date = tmp_date
         else:
             print("The date we got was not prior to the date we seeked. Reducing current date and retrying...")
             current_date -= timedelta(minutes=1)
-        data.write("\n")
         succes_count += 1
         print("Data retrieved successfully. Success: {}, Error: {}, Ignored: {}".format(succes_count, error_count, date_ignored))
     else:
