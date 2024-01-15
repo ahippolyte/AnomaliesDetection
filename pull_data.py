@@ -40,6 +40,7 @@ if __name__ == "__main__":
     day_end = 31
 
     station = int(sys.argv[1])
+    print("Using station number: ", station)
 
     timeout_seconds = 30
     max_retries = 10
