@@ -25,9 +25,7 @@ def extract_date(s):
 DIRECTORY = "data/"
 
 f = open("key.txt", "r")
-data = open(DIRECTORY + "dataset.json", "w")
 key = str(f.read()).strip()
-print(key)
 URL_KEY = "https://data.bordeaux-metropole.fr/geojson/features/CI_VCUB_P?key=" + key
 year = 2022
 month_start = 1
@@ -52,6 +50,10 @@ start_date = datetime(year, month_start, day_start, 0, 0)
 
 succes_count = 0
 error_count = 0
+
+file_name = str(station) + "_" + str(year) + "_" + str(month_start) + "-" + str(day_start) + "_" + str(month_end) + "-" + str(day_end) + ".json"
+
+data = open(DIRECTORY + file_name, "w")
 
 start_time = time.time()
 

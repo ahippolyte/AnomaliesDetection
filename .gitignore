@@ -1,3 +1,4 @@
 key.txt
 data/dataset.json
 venv
+data/*
