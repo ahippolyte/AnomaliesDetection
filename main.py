@@ -1,6 +1,7 @@
 import pandas as pd
 import json
 import matplotlib.pyplot as plt
+import numpy as np
 import prophet as pr
 from datetime import datetime, timedelta
 
@@ -81,16 +82,6 @@ df_prophet = df_prophet.loc[df_prophet['ds'].apply(lambda x: x not in [pd.NaT])]
 df = df.sort_values(by='mdate')
 df_prophet = df_prophet.sort_values(by='ds')
 
-future = pd.DataFrame() 
-future['ds'] = df_prophet['ds']#.apply(lambda x: (x + pd.DateOffset(years=1)).date())
-future = future.drop_duplicates()
-future = future.iloc[0:10000]
-
-model = pr.Prophet()
-model.fit(df_prophet)
-forecast = model.predict(future) 
-#print(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].head())
-
 # Créer un DataFrame Pandas pour les données par jour
 df_per_day = pd.DataFrame(data_list_per_day)
 # Afficher le nombre de journées uniques
@@ -98,23 +89,50 @@ num_unique_days = df_per_day['ds'].nunique()
 print("Number of unique hours:", num_unique_days)
 aggregation_funtion = {'ds': 'first', 'y': 'mean', 'etat': 'first'}
 df_per_day = df_per_day.groupby('ds').aggregate(aggregation_funtion)
-df_per_day = df_per_day.iloc[:2000]
+df_per_day = df_per_day.iloc[:1000]
+
+
+future = pd.DataFrame() 
+future['ds'] = df_per_day['ds']#.apply(lambda x: (x + pd.DateOffset(years=1)).date())
+future = future.drop_duplicates()
+future = future
+
+model = pr.Prophet()
+model.fit(df_prophet)
+forecast = model.predict(future) 
+#print(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].head())
+
+
+anomalies = np.zeros((1, 1000), dtype=int)
+lst_y_lower = forecast["yhat_lower"].tolist()
+lst_y_upper = forecast["yhat_upper"].tolist()
+lst_df_per_day = df_per_day["y"].tolist()
+print(lst_df_per_day)
+
+for k in range(len(lst_df_per_day)):
+    if lst_y_lower[k] <= lst_df_per_day[k] and lst_y_upper[k] >= lst_df_per_day[k]:
+        anomalies[0, k] = 0;
+    else:
+        anomalies[0, k] = 1;
+colormap = np.array(['b', 'r'])
+
+print(anomalies);
+
 # Tacer les points avec etat=="DECONNECTEE" en rouge et les autres en bleu
 plt.figure(figsize=(10, 6))
 
 # Plotting points with etat=="DECONNECTEE" in red (case-insensitive) and smaller points
-# plt.scatter(df[df['etat'].str.lower() == DECONNECTEE_VALUE.lower()]['mdate'], df[df['etat'].str.lower() == DECONNECTEE_VALUE.lower()]['y'], c='red', label=DECONNECTEE_VALUE, s=40)
+plt.scatter(df_per_day[df_per_day['etat'].str.lower() == DECONNECTEE_VALUE.lower()]['ds'], df_per_day[df_per_day['etat'].str.lower() == DECONNECTEE_VALUE.lower()]['y'], c='red', label=DECONNECTEE_VALUE, s=40)
 
 # Plotting other points in blue and smaller points
-# plt.scatter(df_per_day[df_per_day['etat'].str.lower() != DECONNECTEE_VALUE.lower()]['ds'], df_per_day[df_per_day['etat'].str.lower() != DECONNECTEE_VALUE.lower()]['y'], c='blue', label='Occupation Percentage', s=4)
-# plt.scatter(df[df['etat'].str.lower() != DECONNECTEE_VALUE.lower()]['mdate'], df[df['etat'].str.lower() != DECONNECTEE_VALUE.lower()]['y'], c='blue', label='Occupation Percentage', s=4)
+plt.scatter(df_per_day['ds'], df_per_day['y'], c=colormap[anomalies][0], s=4)
 
 # Connecting all points with a line
-plt.plot(df_per_day['ds'], df_per_day['y'], color='black', linestyle='-', linewidth=0.5)
+plt.plot(df_per_day['ds'], df_per_day['y'], color='black', linestyle='-', label='Occupation Percentage', linewidth=0.5)
 # plt.plot(df['mdate'], df['y'], color='black', linestyle='-', linewidth=1)
 
 # Prophet plot
-plt.plot(forecast['ds'], forecast['yhat'], color="green", linestyle='-', linewidth=1)
+plt.plot(forecast['ds'], forecast['yhat'], color="green", linestyle='-', label='Prophet prediction', linewidth=1)
 plt.fill_between(forecast['ds'], forecast['yhat_lower'], forecast['yhat_upper'], color='green', alpha = 0.1)
 
 plt.title('Occupation Percentage Over Time')
