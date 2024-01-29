@@ -122,21 +122,28 @@ print(anomalies);
 plt.figure(figsize=(10, 6))
 
 # Plotting points with etat=="DECONNECTEE" in red (case-insensitive) and smaller points
-plt.scatter(df_per_day[df_per_day['etat'].str.lower() == DECONNECTEE_VALUE.lower()]['ds'], df_per_day[df_per_day['etat'].str.lower() == DECONNECTEE_VALUE.lower()]['y'], c='red', label=DECONNECTEE_VALUE, s=40)
+plt.scatter(df_per_day[df_per_day['etat'].str.lower() == DECONNECTEE_VALUE.lower()]['ds'], df_per_day[df_per_day['etat'].str.lower() == DECONNECTEE_VALUE.lower()]['y'], c='red', label="Deconnection", s=40)
 
 # Plotting other points in blue and smaller points
-plt.scatter(df_per_day['ds'], df_per_day['y'], c=colormap[anomalies][0], s=4)
+plt.scatter(df_per_day['ds'], df_per_day['y'], c=colormap[anomalies][0], label="Correct data points", s=4)
+plt.scatter(["2022-01-01"], [-1], c="r", label="Anomalies", s=4)
 
 # Connecting all points with a line
-plt.plot(df_per_day['ds'], df_per_day['y'], color='black', linestyle='-', label='Occupation Percentage', linewidth=0.5)
+#plt.plot(df_per_day['ds'], df_per_day['y'], color='black', linestyle='-', label='Occupation Percentage', linewidth=0.5)
 # plt.plot(df['mdate'], df['y'], color='black', linestyle='-', linewidth=1)
 
 # Prophet plot
 plt.plot(forecast['ds'], forecast['yhat'], color="green", linestyle='-', label='Prophet prediction', linewidth=1)
 plt.fill_between(forecast['ds'], forecast['yhat_lower'], forecast['yhat_upper'], color='green', alpha = 0.1)
-
+plt.ylim(0, 1);
 plt.title('Occupation Percentage Over Time')
 plt.xlabel('Date and Time')
 plt.ylabel('Occupation Percentage')
 plt.legend()
+plt.savefig("graph2022.pdf", format="pdf")
+plt.show()
+plt.close()
+
+model.plot_components(forecast)
+plt.savefig("components.pdf", format="pdf")
 plt.show()
